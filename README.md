@@ -56,27 +56,17 @@ GROUP BY 1;
 ### 2. Find the Most Common Rating for Movies and TV Shows
 
 ```sql
-WITH RatingCounts AS (
-    SELECT 
-        type,
-        rating,
-        COUNT(*) AS rating_count
-    FROM netflix
-    GROUP BY type, rating
-),
-RankedRatings AS (
-    SELECT 
-        type,
-        rating,
-        rating_count,
-        RANK() OVER (PARTITION BY type ORDER BY rating_count DESC) AS rank
-    FROM RatingCounts
+with data as(
+select
+type,rating,count(*) as count_rating,
+dense_rank()over(partition by type order by count(*) desc) as rnk
+from netflix
+group by 1,2
+order by 1,3 desc
 )
-SELECT 
-    type,
-    rating AS most_frequent_rating
-FROM RankedRatings
-WHERE rank = 1;
+select type,rating from data
+where rnk = 1
+
 ```
 
 **Objective:** Identify the most frequently occurring rating for each type of content.
